@@ -9,4 +9,4 @@ export const StyledCell = styled.div`
     border-left-color: rgba(${props => props.color}, 0.3);
 `
 // lines 5-9 provide a shadow effect to the blocks
-// for future reference, line 5 is an example of a ternary operator and the alpha values are so I can get different opacity levels on the blocks
+// for future reference, line 5 is an example of a ternary operator (?) and the alpha values are so I can get different opacity levels on the blocks
