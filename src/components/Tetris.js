@@ -1,5 +1,5 @@
 import React, { useState } from  'react';
-import { createStage } from '../gameHelpers';
+import { createStage, checkCollision } from '../gameHelpers';
 //These are the Styled Components
 import { StyledTetrisWrapper, StyledTetris } from './styles/StyledTetris';
 
@@ -13,22 +13,49 @@ import Display from './Display';
 import StartButton from './StartButton';
 
 const Tetris = () => {
-    const [dropTime, setDropTime] = useState(null);
+    const [ setDropTime] = useState(null);
     const [gameOver, setGameOver] = useState(false);
 
-    const [player] = usePlayer();
+    const [player, updatePlayerPos, resetPlayer] = usePlayer();
     const [stage, setStage] = useStage(player);
 
 console.log('re-render');
-const movePlayer = dir => {
 
+const movePlayer = dir => {
+    if (!checkCollision(player, stage, { x: dir, y: 0 })) {
+    updatePlayerPos({ x: dir, y:0 });
+    }
+}
+
+const startGame = () => {
+    //Resets everything
+    setStage(createStage());
+    resetPlayer();
+    //Line below means that we're starting a new game here, so it shouldn't be set to true
+    setGameOver(false);
 }
 
 const drop = () => {
-    drop();
+    if (!checkCollision(player, stage, { x: 0, y: 1 })) {
+    updatePlayerPos({ x: 0, y: 1, collided: false})
+    }
+    else {
+        // GAME OVER
+        // The line below means that if we collide with the top of the grid, it's GAME OVER
+        if (player.poa.y < 1) {
+            console.log("GAME OVER");
+            setGameOver(true);
+            setDropTime(null);
+        }
+        updatePlayerPos({ x: 0, y: 0, collided: true})
+        }
 }
 
 const dropPlayer = () => {
+    drop();
+}
+
+const move = ({ keyCode }) => {
     if (!gameOver) {
         if (keyCode === 37) {
             movePlayer(-1);
@@ -40,16 +67,13 @@ const dropPlayer = () => {
     }
 }
 
-const move = ({ keyCode }) => {
-
-}
 
 return (
     <StyledTetrisWrapper role="button" tabIndex="0" onKeyDown={e => move(e)}>
         <StyledTetris>
-        <Stage stage={stage()}/>
+        <Stage stage={stage}/>
         <aside>
-            {gameOver ? (<Display gameOver={gameOver} text="Game Over"/>):
+            {gameOver ? (<Display gameOver={gameOver} text="GAME OVER"/>):
         (
             <div>
             <Display text = "SCORE" />
@@ -57,7 +81,7 @@ return (
             <Display text = "LEVEL" />
             </div>
         )}
-            <StartButton />
+            <StartButton callback={startGame}/>
         </aside>
         </StyledTetris>
     </StyledTetrisWrapper>
